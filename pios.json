@@ -1,0 +1,16 @@
+{
+  "name": "JoyKiss Pistore",
+  "description": "Toko produk olahan hasil pertanian, perkebunan, perikanan, dan laut. Pembayaran menggunakan Pi.",
+  "url": "https://joykiss-pistore.vercel.app",
+  "icons": [
+    {
+      "src": "https://joykiss-pistore.vercel.app/icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "developer": {
+    "name": "Nama Kamu",
+    "email": "email@example.com"
+  }
+}
