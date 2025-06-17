@@ -1,15 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>JoyKiss Pistore</title>
-</head>
-<body>
-  <h1>Selamat datang di JoyKiss Pistore</h1>
-  <button id="loginBtn">Login dengan Pi</button>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<button onclick="login()">Login ke Pi</button>
+<p id="status">Status: belum login</p>
 
-  <div id="produk"></div>
+<script>
+  function login() {
+    if (!window.Pi) {
+      alert("SDK Pi tidak tersedia. Pastikan kamu pakai Pi Browser.");
+      return;
+    }
 
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-  <script type="module" src="/src/app.js"></script>
-</body>
-</html>
+    Pi.authenticate(["username"], function(auth) {
+      if (auth && auth.user && auth.user.username) {
+        console.log("Login berhasil:", auth);
+        document.getElementById("status").innerText = "Login sebagai: " + auth.user.username;
+      } else {
+        alert("Login gagal. Coba lagi.");
+      }
+    });
+  }
+</script>
