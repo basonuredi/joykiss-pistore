@@ -10,6 +10,14 @@
   <button onclick="bayar()">Bayar Sekarang</button>
 
   <script>
+    // Inisialisasi autentikasi terlebih dahulu
+    document.addEventListener("DOMContentLoaded", function () {
+      Pi.authenticate(["username"], function(auth) {
+        console.log("Autentikasi berhasil:", auth);
+      });
+    });
+
+    // Fungsi tombol bayar
     function bayar() {
       window.Pi.openPayment({
         amount: 0.001,
