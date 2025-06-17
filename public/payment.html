@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pembayaran Pi JoyKiss Pistore</title>
+  <script defer src="https://sdk.minepi.com/pi-sdk.js"></script>
+</head>
+<body>
+  <h2>Pembayaran Uji Coba JoyKiss Pistore</h2>
+  <p>Silakan tekan tombol di bawah untuk membayar <strong>0.001 Pi</strong>.</p>
+  <button onclick="bayar()">Bayar Sekarang</button>
 
+  <script>
+    function bayar() {
+      window.Pi.openPayment({
+        amount: 0.001,
+        memo: "Pembayaran Test Step 11 JoyKiss",
+        metadata: { tujuan: "uji fitur pembayaran" }
+      }, {
+        onReadyForServerApproval: function(paymentId) {
+          console.log("Payment ID dikirim ke server:", paymentId);
+        },
+        onReadyForServerCompletion: function(paymentId, txid) {
+          alert("Pembayaran berhasil! TxID: " + txid);
+        },
+        onCancel: function(paymentId) {
+          alert("Pembayaran dibatalkan.");
+        },
+        onError: function(error, payment) {
+          alert("Terjadi kesalahan: " + error);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
