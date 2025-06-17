@@ -10,22 +10,31 @@
   <button onclick="bayar()">Bayar Sekarang</button>
 
   <script>
-    // Inisialisasi autentikasi terlebih dahulu
+    // Jalankan autentikasi saat halaman dibuka
     document.addEventListener("DOMContentLoaded", function () {
-      Pi.authenticate(["username"], function(auth) {
-        console.log("Autentikasi berhasil:", auth);
-      });
+      if (window.Pi) {
+        Pi.authenticate(["username"], function(auth) {
+          console.log("Autentikasi berhasil:", auth);
+        });
+      } else {
+        alert("Harap buka halaman ini lewat Pi Browser.");
+      }
     });
 
-    // Fungsi tombol bayar
+    // Fungsi pembayaran
     function bayar() {
-      window.Pi.openPayment({
+      if (!window.Pi) {
+        alert("Harap buka halaman ini lewat Pi Browser.");
+        return;
+      }
+
+      Pi.openPayment({
         amount: 0.001,
         memo: "Pembayaran Test Step 11 JoyKiss",
         metadata: { tujuan: "uji fitur pembayaran" }
       }, {
         onReadyForServerApproval: function(paymentId) {
-          console.log("Payment ID dikirim ke server:", paymentId);
+          console.log("Payment ID:", paymentId);
         },
         onReadyForServerCompletion: function(paymentId, txid) {
           alert("Pembayaran berhasil! TxID: " + txid);
