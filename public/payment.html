@@ -2,29 +2,32 @@
 <html>
 <head>
   <title>Pembayaran Pi JoyKiss Pistore</title>
-  <script defer src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
-  <h2>Pembayaran Uji Coba JoyKiss Pistore</h2>
-  <p>Silakan tekan tombol di bawah untuk membayar <strong>0.001 Pi</strong>.</p>
-  <button onclick="bayar()">Bayar Sekarang</button>
+  <h2>Pembayaran Test JoyKiss Pistore</h2>
+
+  <p id="status">Status: belum login</p>
+  <button onclick="login()">Login ke Pi</button>
+  <br><br>
+  <button onclick="bayar()">Bayar Sekarang 0.001 Pi</button>
 
   <script>
-    // Jalankan autentikasi saat halaman dibuka
-    document.addEventListener("DOMContentLoaded", function () {
-      if (window.Pi) {
-        Pi.authenticate(["username"], function(auth) {
-          console.log("Autentikasi berhasil:", auth);
-        });
-      } else {
-        alert("Harap buka halaman ini lewat Pi Browser.");
+    function login() {
+      if (!window.Pi) {
+        alert("Harap buka lewat Pi Browser.");
+        return;
       }
-    });
 
-    // Fungsi pembayaran
+      Pi.authenticate(["username"], function(auth) {
+        console.log("Autentikasi berhasil:", auth);
+        document.getElementById("status").innerText = "Login sebagai: " + auth.user.username;
+      });
+    }
+
     function bayar() {
       if (!window.Pi) {
-        alert("Harap buka halaman ini lewat Pi Browser.");
+        alert("Harap buka lewat Pi Browser.");
         return;
       }
 
