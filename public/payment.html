@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Pembayaran Pi JoyKiss Pistore</title>
+  <meta charset="UTF-8" />
+  <title>JoyKiss Pembayaran Pi</title>
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
-  <h2>Pembayaran Test JoyKiss Pistore</h2>
+  <h2>Pembayaran Uji Coba JoyKiss Pistore</h2>
 
-  <p id="status">Status: belum login</p>
+  <p id="status">Status: Belum login</p>
   <button onclick="login()">Login ke Pi</button>
-  <br><br>
-  <button onclick="bayar()">Bayar Sekarang 0.001 Pi</button>
+
+  <hr/>
+
+  <button onclick="bayar()">Bayar Sekarang (0.001 Pi)</button>
 
   <script>
     function login() {
@@ -20,8 +23,12 @@
       }
 
       Pi.authenticate(["username"], function(auth) {
-        console.log("Autentikasi berhasil:", auth);
-        document.getElementById("status").innerText = "Login sebagai: " + auth.user.username;
+        if (auth && auth.user && auth.user.username) {
+          document.getElementById("status").innerText = "Login sebagai: " + auth.user.username;
+          console.log("Login berhasil:", auth);
+        } else {
+          alert("Login gagal. Coba lagi.");
+        }
       });
     }
 
@@ -33,17 +40,17 @@
 
       Pi.openPayment({
         amount: 0.001,
-        memo: "Pembayaran Test Step 11 JoyKiss",
-        metadata: { tujuan: "uji fitur pembayaran" }
+        memo: "Pembayaran Test JoyKiss Step 11",
+        metadata: { source: "payment.html", tujuan: "uji fitur pembayaran Pi SDK" }
       }, {
         onReadyForServerApproval: function(paymentId) {
-          console.log("Payment ID:", paymentId);
+          console.log("Menunggu persetujuan server: ", paymentId);
         },
         onReadyForServerCompletion: function(paymentId, txid) {
           alert("Pembayaran berhasil! TxID: " + txid);
         },
         onCancel: function(paymentId) {
-          alert("Pembayaran dibatalkan.");
+          alert("Pembayaran dibatalkan oleh pengguna.");
         },
         onError: function(error, payment) {
           alert("Terjadi kesalahan: " + error);
