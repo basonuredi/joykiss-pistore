@@ -9,75 +9,86 @@
 <body style="text-align:center; font-family:Arial; padding:50px;">
 
   <h1>JoyKiss Pistore</h1>
-  <p>Pembayaran dengan Pi Network</p>
 
-  <button onclick="bayarPi()" style="padding:15px 30px; font-size:18px;">
+  <button onclick="loginPi()" style="padding:15px; font-size:18px;">
+    Login Pi
+  </button>
+
+  <br><br>
+
+  <button onclick="bayarPi()" style="padding:15px; font-size:18px;">
     Bayar dengan Pi
   </button>
 
-  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <script>
-    function bayarPi() {
-      alert("Mulai");
+    let piUser = null;
 
+    function loginPi() {
       const Pi = window.Pi;
 
       if (!Pi) {
-        alert("❌ Pi SDK tidak aktif");
+        alert("SDK tidak aktif");
         return;
       }
 
-      // INIT
       Pi.init({ version: "2.0" });
 
-      // AUTHENTICATE
       Pi.authenticate(['payments'], function(auth) {
-
-        alert("Login OK");
-
-        // PAYMENT (INI BAGIAN KUNCI)
-        Pi.createPayment(
-          {
-            amount: 0.01,
-            memo: "JoyKiss Test Payment",
-            metadata: { app: "joykiss" }
-          },
-          {
-            onReadyForServerApproval: function(paymentId) {
-              alert("➡️ APPROVAL: " + paymentId);
-
-              fetch('/api/approve', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId })
-              });
-            },
-
-            onReadyForServerCompletion: function(paymentId, txid) {
-              alert("✅ TX: " + txid);
-
-              fetch('/api/complete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ paymentId, txid })
-              });
-            },
-
-            onCancel: function() {
-              alert("❌ Pembayaran dibatalkan");
-            },
-
-            onError: function(error) {
-              alert("❌ Error: " + JSON.stringify(error));
-            }
-          }
-        );
-
+        piUser = auth;
+        alert("✅ Login berhasil");
       }, function(error) {
-        alert("❌ Login gagal: " + JSON.stringify(error));
+        alert("❌ Login gagal");
       });
+    }
+
+    function bayarPi() {
+      const Pi = window.Pi;
+
+      if (!Pi || !piUser) {
+        alert("❌ Silakan login dulu");
+        return;
+      }
+
+      alert("Mulai Payment");
+
+      Pi.createPayment(
+        {
+          amount: 0.01,
+          memo: "JoyKiss Test",
+          metadata: {}
+        },
+        {
+          onReadyForServerApproval: function(paymentId) {
+            alert("➡️ APPROVAL");
+
+            fetch('/api/approve', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentId })
+            });
+          },
+
+          onReadyForServerCompletion: function(paymentId, txid) {
+            alert("✅ TX: " + txid);
+
+            fetch('/api/complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentId, txid })
+            });
+          },
+
+          onCancel: function() {
+            alert("❌ Dibatalkan");
+          },
+
+          onError: function(error) {
+            alert("❌ Error: " + JSON.stringify(error));
+          }
+        }
+      );
     }
   </script>
 
