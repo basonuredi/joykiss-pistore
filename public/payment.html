@@ -1,62 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>JoyKiss Pembayaran Pi</title>
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <meta charset="UTF-8">
+  <title>JoyKiss Pistore - Pembayaran Pi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-  <h2>Pembayaran Uji Coba JoyKiss Pistore</h2>
 
-  <p id="status">Status: Belum login</p>
-  <button onclick="login()">Login ke Pi</button>
+<body style="font-family: Arial; text-align: center; padding: 40px;">
 
-  <hr/>
+  <h1>JoyKiss Pistore</h1>
+  <p>Pembayaran menggunakan Pi Network</p>
 
-  <button onclick="bayar()">Bayar Sekarang (0.001 Pi)</button>
+  <button onclick="bayarPi()" style="padding: 15px 30px; font-size: 18px;">
+    Bayar dengan Pi
+  </button>
+
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <script>
-    function login() {
-      if (!window.Pi) {
-        alert("Harap buka lewat Pi Browser.");
+    function bayarPi() {
+      alert("Mulai");
+
+      const Pi = window.Pi;
+
+      if (!Pi) {
+        alert("❌ Pi SDK tidak aktif");
         return;
       }
 
-      Pi.authenticate(["username"], function(auth) {
-        if (auth && auth.user && auth.user.username) {
-          document.getElementById("status").innerText = "Login sebagai: " + auth.user.username;
-          console.log("Login berhasil:", auth);
-        } else {
-          alert("Login gagal. Coba lagi.");
-        }
-      });
-    }
+      Pi.init({ version: "2.0" });
 
-    function bayar() {
-      if (!window.Pi) {
-        alert("Harap buka lewat Pi Browser.");
-        return;
-      }
+      Pi.authenticate([], function(auth) {
+        console.log("Login sukses");
 
-      Pi.openPayment({
-        amount: 0.001,
-        memo: "Pembayaran Test JoyKiss Step 11",
-        metadata: { source: "payment.html", tujuan: "uji fitur pembayaran Pi SDK" }
-      }, {
-        onReadyForServerApproval: function(paymentId) {
-          console.log("Menunggu persetujuan server: ", paymentId);
-        },
-        onReadyForServerCompletion: function(paymentId, txid) {
-          alert("Pembayaran berhasil! TxID: " + txid);
-        },
-        onCancel: function(paymentId) {
-          alert("Pembayaran dibatalkan oleh pengguna.");
-        },
-        onError: function(error, payment) {
-          alert("Terjadi kesalahan: " + error);
-        }
+        Pi.createPayment(
+          {
+            amount: 0.01,
+            memo: "JoyKiss Test Payment",
+            metadata: { app: "joykiss-pistore" }
+          },
+          {
+            onReadyForServerApproval: function(paymentId) {
+              alert("➡️ Approval dipanggil");
+
+              fetch('/api/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId })
+              });
+            },
+
+            onReadyForServerCompletion: function(paymentId, txid) {
+              alert("✅ Transaksi sukses: " + txid);
+
+              fetch('/api/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId, txid })
+              });
+            },
+
+            onCancel: function() {
+              alert("❌ Pembayaran dibatalkan");
+            },
+
+            onError: function(error) {
+              alert("❌ Error: " + JSON.stringify(error));
+            }
+          }
+        );
+
+      }, function(error) {
+        alert("❌ Login gagal: " + JSON.stringify(error));
       });
     }
   </script>
+
 </body>
 </html>
