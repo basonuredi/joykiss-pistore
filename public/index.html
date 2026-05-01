@@ -1,74 +1,65 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>JoyKiss Pistore</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-<body style="text-align:center; font-family:Arial; padding:50px;">
+<script>
+async function bayarPi() {
+  alert("Mulai");
 
-  <h1>JoyKiss Pistore</h1>
-  <p>Marketplace berbasis Pi Network</p>
+  const Pi = window.Pi;
 
-  <button onclick="bayarPi()" style="padding:15px 30px; font-size:18px;">
-    Bayar dengan Pi
-  </button>
+  if (!Pi) {
+    alert("❌ SDK tidak aktif");
+    return;
+  }
 
-  <!-- Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  Pi.init({ version: "2.0" });
 
-  <script>
-    function bayarPi() {
-      alert("Mulai");
+  try {
+    // LOGIN DULU
+    const scopes = ['payments'];
+    const auth = await Pi.authenticate(scopes);
 
-      const Pi = window.Pi;
+    alert("✅ Login berhasil");
 
-      if (!Pi) {
-        alert("❌ Pi SDK tidak aktif");
-        return;
-      }
+    // BARU PAYMENT
+    Pi.createPayment(
+      {
+        amount: 0.01,
+        memo: "JoyKiss Test",
+        metadata: {}
+      },
+      {
+        onReadyForServerApproval: function(paymentId) {
+          alert("➡️ APPROVAL");
 
-      Pi.init({ version: "2.0" });
-
-      Pi.createPayment(
-        {
-          amount: 0.01,
-          memo: "JoyKiss Test Payment",
-          metadata: {}
+          fetch('/api/approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+          });
         },
-        {
-          onReadyForServerApproval: function(paymentId) {
-            alert("➡️ APPROVAL");
 
-            fetch('/api/approve', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ paymentId })
-            });
-          },
+        onReadyForServerCompletion: function(paymentId, txid) {
+          alert("✅ TX: " + txid);
 
-          onReadyForServerCompletion: function(paymentId, txid) {
-            alert("✅ TX: " + txid);
+          fetch('/api/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId, txid })
+          });
+        },
 
-            fetch('/api/complete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ paymentId, txid })
-            });
-          },
+        onCancel: function() {
+          alert("❌ Dibatalkan");
+        },
 
-          onCancel: function() {
-            alert("❌ Dibatalkan");
-          },
-
-          onError: function(error) {
-            alert("❌ Error: " + JSON.stringify(error));
-          }
+        onError: function(error) {
+          alert("❌ Error: " + JSON.stringify(error));
         }
-      );
-    }
-  </script>
+      }
+    );
 
-</body>
-</html>
+  } catch (err) {
+    alert("❌ Login gagal: " + JSON.stringify(err));
+  }
+}
+</script>
