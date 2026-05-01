@@ -19,21 +19,41 @@
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <script>
-    function bayarPi() {
-      alert("Mulai");
+function bayarPi() {
+  alert("Mulai");
 
-      const Pi = window.Pi;
+  const Pi = window.Pi;
 
-      if (!Pi) {
-        alert("SDK tidak aktif");
-        return;
+  if (!Pi) {
+    alert("SDK tidak aktif");
+    return;
+  }
+
+  Pi.init({ version: "2.0" });
+
+  Pi.createPayment(
+    {
+      amount: 0.01,
+      memo: "Test",
+      metadata: {}
+    },
+    {
+      onReadyForServerApproval: function(paymentId) {
+        alert("APPROVAL TERPANGGIL");
+      },
+
+      onCancel: function() {
+        alert("Dibatalkan");
+      },
+
+      onError: function(error) {
+        alert("ERROR: " + JSON.stringify(error));
       }
-
-      Pi.init({ version: "2.0" });
-
-      alert("SDK siap");
     }
-  </script>
+  );
+}
+</script>
+        
 
 </body>
 </html>
