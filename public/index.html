@@ -1,37 +1,74 @@
-<script>
-function bayarPi() {
-  alert("Mulai");
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>JoyKiss Pistore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-  const Pi = window.Pi;
+<body style="text-align:center; font-family:Arial; padding:50px;">
 
-  if (!Pi) {
-    alert("SDK tidak aktif");
-    return;
-  }
+  <h1>JoyKiss Pistore</h1>
+  <p>Marketplace berbasis Pi Network</p>
 
-  Pi.init({ version: "2.0" });
+  <button onclick="bayarPi()" style="padding:15px 30px; font-size:18px;">
+    Bayar dengan Pi
+  </button>
 
-  Pi.createPayment(
-    {
-      amount: 0.01,
-      memo: "Test",
-      metadata: {}
-    },
-    {
-      onReadyForServerApproval: function(paymentId) {
-        alert("APPROVAL");
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-        fetch('/api/approve', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paymentId })
-        });
-      },
+  <script>
+    function bayarPi() {
+      alert("Mulai");
 
-      onError: function(error) {
-        alert("ERROR: " + JSON.stringify(error));
+      const Pi = window.Pi;
+
+      if (!Pi) {
+        alert("❌ Pi SDK tidak aktif");
+        return;
       }
+
+      Pi.init({ version: "2.0" });
+
+      Pi.createPayment(
+        {
+          amount: 0.01,
+          memo: "JoyKiss Test Payment",
+          metadata: {}
+        },
+        {
+          onReadyForServerApproval: function(paymentId) {
+            alert("➡️ APPROVAL");
+
+            fetch('/api/approve', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentId })
+            });
+          },
+
+          onReadyForServerCompletion: function(paymentId, txid) {
+            alert("✅ TX: " + txid);
+
+            fetch('/api/complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentId, txid })
+            });
+          },
+
+          onCancel: function() {
+            alert("❌ Dibatalkan");
+          },
+
+          onError: function(error) {
+            alert("❌ Error: " + JSON.stringify(error));
+          }
+        }
+      );
     }
-  );
-}
-</script>
+  </script>
+
+</body>
+</html>
