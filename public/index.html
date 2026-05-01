@@ -18,7 +18,7 @@
   <!-- SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  <script>
+<script>
 function bayarPi() {
   alert("Mulai");
 
@@ -29,31 +29,23 @@ function bayarPi() {
     return;
   }
 
-  Pi.init({ version: "2.0" });
+  Pi.init({ version: "2.0", sandbox: true });
 
-  Pi.createPayment(
-    {
+  Pi.authenticate(['payments']).then(function(auth) {
+    alert("Login OK");
+
+    return Pi.createPayment({
       amount: 0.01,
       memo: "Test",
       metadata: {}
-    },
-    {
-      onReadyForServerApproval: function(paymentId) {
-        alert("APPROVAL TERPANGGIL");
-      },
-
-      onCancel: function() {
-        alert("Dibatalkan");
-      },
-
-      onError: function(error) {
-        alert("ERROR: " + JSON.stringify(error));
-      }
-    }
-  );
+    });
+  }).then(function(payment) {
+    alert("Payment object muncul");
+  }).catch(function(error) {
+    alert("ERROR: " + JSON.stringify(error));
+  });
 }
 </script>
-        
 
 </body>
 </html>
