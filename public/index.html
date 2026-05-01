@@ -9,43 +9,78 @@
 <body style="text-align:center; font-family:Arial; padding:50px;">
 
   <h1>JoyKiss Pistore</h1>
+  <p>Pembayaran dengan Pi Network</p>
 
-  <!-- TOMBOL -->
   <button onclick="bayarPi()" style="padding:15px 30px; font-size:18px;">
     Bayar dengan Pi
   </button>
 
-  <!-- SDK -->
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-<script>
-function bayarPi() {
-  alert("Mulai");
+  <script>
+    function bayarPi() {
+      alert("Mulai");
 
-  const Pi = window.Pi;
+      const Pi = window.Pi;
 
-  if (!Pi) {
-    alert("SDK tidak aktif");
-    return;
-  }
+      if (!Pi) {
+        alert("❌ Pi SDK tidak aktif");
+        return;
+      }
 
-  Pi.init({ version: "2.0", sandbox: true });
+      // INIT
+      Pi.init({ version: "2.0" });
 
-  Pi.authenticate(['payments']).then(function(auth) {
-    alert("Login OK");
+      // AUTHENTICATE
+      Pi.authenticate(['payments'], function(auth) {
 
-    return Pi.createPayment({
-      amount: 0.01,
-      memo: "Test",
-      metadata: {}
-    });
-  }).then(function(payment) {
-    alert("Payment object muncul");
-  }).catch(function(error) {
-    alert("ERROR: " + JSON.stringify(error));
-  });
-}
-</script>
+        alert("Login OK");
+
+        // PAYMENT (INI BAGIAN KUNCI)
+        Pi.createPayment(
+          {
+            amount: 0.01,
+            memo: "JoyKiss Test Payment",
+            metadata: { app: "joykiss" }
+          },
+          {
+            onReadyForServerApproval: function(paymentId) {
+              alert("➡️ APPROVAL: " + paymentId);
+
+              fetch('/api/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId })
+              });
+            },
+
+            onReadyForServerCompletion: function(paymentId, txid) {
+              alert("✅ TX: " + txid);
+
+              fetch('/api/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId, txid })
+              });
+            },
+
+            onCancel: function() {
+              alert("❌ Pembayaran dibatalkan");
+            },
+
+            onError: function(error) {
+              alert("❌ Error: " + JSON.stringify(error));
+            }
+          }
+        );
+
+      }, function(error) {
+        alert("❌ Login gagal: " + JSON.stringify(error));
+      });
+    }
+  </script>
 
 </body>
 </html>
+
