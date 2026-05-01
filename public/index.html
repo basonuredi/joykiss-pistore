@@ -1,21 +1,37 @@
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<button onclick="login()">Login ke Pi</button>
-<p id="status">Status: belum login</p>
-
 <script>
-  function login() {
-    if (!window.Pi) {
-      alert("SDK Pi tidak tersedia. Pastikan kamu pakai Pi Browser.");
-      return;
-    }
+function bayarPi() {
+  alert("Mulai");
 
-    Pi.authenticate(["username"], function(auth) {
-      if (auth && auth.user && auth.user.username) {
-        console.log("Login berhasil:", auth);
-        document.getElementById("status").innerText = "Login sebagai: " + auth.user.username;
-      } else {
-        alert("Login gagal. Coba lagi.");
-      }
-    });
+  const Pi = window.Pi;
+
+  if (!Pi) {
+    alert("SDK tidak aktif");
+    return;
   }
+
+  Pi.init({ version: "2.0" });
+
+  Pi.createPayment(
+    {
+      amount: 0.01,
+      memo: "Test",
+      metadata: {}
+    },
+    {
+      onReadyForServerApproval: function(paymentId) {
+        alert("APPROVAL");
+
+        fetch('/api/approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paymentId })
+        });
+      },
+
+      onError: function(error) {
+        alert("ERROR: " + JSON.stringify(error));
+      }
+    }
+  );
+}
 </script>
