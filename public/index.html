@@ -20,33 +20,44 @@
     Bayar dengan Pi
   </button>
 
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
   <script>
+    let Pi;
     let piUser = null;
 
-    function loginPi() {
-      const Pi = window.Pi;
+    // 🔥 INIT SAAT HALAMAN DIBUKA
+    window.onload = function () {
+      Pi = window.Pi;
 
       if (!Pi) {
-        alert("SDK tidak aktif");
+        alert("❌ Pi SDK tidak terdeteksi");
         return;
       }
 
       Pi.init({ version: "2.0" });
+      console.log("✅ Pi SDK siap");
+    };
+
+    function loginPi() {
+      alert("Klik login");
+
+      if (!Pi) {
+        alert("❌ SDK belum siap");
+        return;
+      }
 
       Pi.authenticate(['payments'], function(auth) {
         piUser = auth;
         alert("✅ Login berhasil");
       }, function(error) {
-        alert("❌ Login gagal");
+        alert("❌ Login gagal: " + JSON.stringify(error));
       });
     }
 
     function bayarPi() {
-      const Pi = window.Pi;
-
-      if (!Pi || !piUser) {
+      if (!piUser) {
         alert("❌ Silakan login dulu");
         return;
       }
