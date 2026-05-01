@@ -1,65 +1,39 @@
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>JoyKiss Pistore</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
 
-<script>
-async function bayarPi() {
-  alert("Mulai");
+<body style="text-align:center; font-family:Arial; padding:50px;">
 
-  const Pi = window.Pi;
+  <h1>JoyKiss Pistore</h1>
 
-  if (!Pi) {
-    alert("❌ SDK tidak aktif");
-    return;
-  }
+  <!-- TOMBOL -->
+  <button onclick="bayarPi()" style="padding:15px 30px; font-size:18px;">
+    Bayar dengan Pi
+  </button>
 
-  Pi.init({ version: "2.0" });
+  <!-- SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
-  try {
-    // LOGIN DULU
-    const scopes = ['payments'];
-    const auth = await Pi.authenticate(scopes);
+  <script>
+    function bayarPi() {
+      alert("Mulai");
 
-    alert("✅ Login berhasil");
+      const Pi = window.Pi;
 
-    // BARU PAYMENT
-    Pi.createPayment(
-      {
-        amount: 0.01,
-        memo: "JoyKiss Test",
-        metadata: {}
-      },
-      {
-        onReadyForServerApproval: function(paymentId) {
-          alert("➡️ APPROVAL");
-
-          fetch('/api/approve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId })
-          });
-        },
-
-        onReadyForServerCompletion: function(paymentId, txid) {
-          alert("✅ TX: " + txid);
-
-          fetch('/api/complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId, txid })
-          });
-        },
-
-        onCancel: function() {
-          alert("❌ Dibatalkan");
-        },
-
-        onError: function(error) {
-          alert("❌ Error: " + JSON.stringify(error));
-        }
+      if (!Pi) {
+        alert("SDK tidak aktif");
+        return;
       }
-    );
 
-  } catch (err) {
-    alert("❌ Login gagal: " + JSON.stringify(err));
-  }
-}
-</script>
+      Pi.init({ version: "2.0" });
+
+      alert("SDK siap");
+    }
+  </script>
+
+</body>
+</html>
