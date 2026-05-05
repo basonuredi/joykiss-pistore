@@ -1,7 +1,7 @@
-export default async function handler(req, res) {
-  const { paymentId, txid } = req.body;
+export default function handler(req, res) {
+  if (req.method === 'POST') {
+    return res.status(200).json({ success: true });
+  }
 
-  console.log("COMPLETE:", paymentId, txid);
-
-  res.status(200).json({ success: true });
+  res.status(200).send("Complete endpoint hidup");
 }
