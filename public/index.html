@@ -5,6 +5,7 @@
   <title>JoyKiss Pistore</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 
@@ -27,6 +28,7 @@
   <script>
     let piUser = null;
 
+    // INIT
     window.onload = function () {
       if (!window.Pi) {
         document.getElementById("status").innerText = "❌ Buka di Pi Browser";
@@ -37,9 +39,10 @@
       document.getElementById("status").innerText = "✅ Pi SDK siap";
     };
 
+    // LOGIN (TANPA scope payments)
     async function loginPi() {
       try {
-        const auth = await window.Pi.authenticate(['username', 'payments']);
+        const auth = await window.Pi.authenticate(['username']);
         piUser = auth;
 
         document.getElementById("status").innerText =
@@ -51,9 +54,10 @@
       }
     }
 
+    // PAYMENT
     function bayarPi() {
       if (!piUser) {
-        alert("Login dulu");
+        alert("❌ Login dulu");
         return;
       }
 
@@ -61,7 +65,7 @@
         {
           amount: 0.01,
           memo: "Test JoyKiss",
-          metadata: {}
+          metadata: { productId: "test001" }
         },
         {
           onReadyForServerApproval: function(paymentId) {
@@ -79,11 +83,12 @@
               body: JSON.stringify({ paymentId, txid })
             });
 
-            alert("✅ Transaksi berhasil");
+            document.getElementById("status").innerText =
+              "✅ Transaksi berhasil: " + txid;
           },
 
           onCancel: function() {
-            alert("❌ Dibatalkan");
+            alert("❌ Transaksi dibatalkan");
           },
 
           onError: function(error) {
