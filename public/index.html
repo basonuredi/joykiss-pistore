@@ -39,27 +39,34 @@
       document.getElementById("status").innerText = "✅ Pi SDK siap";
     };
 
-    // LOGIN (TANPA scope payments)
+    // LOGIN (pakai payments)
     async function loginPi() {
       try {
-        const auth = await window.Pi.authenticate(['username']);
+        alert("Mulai login...");
+
+        const auth = await window.Pi.authenticate(['username', 'payments']);
         piUser = auth;
 
         document.getElementById("status").innerText =
           "✅ Login: " + auth.user.username;
 
+        alert("Login sukses");
+
       } catch (error) {
-        document.getElementById("status").innerText =
-          "❌ Login gagal";
+        alert("❌ Login gagal: " + JSON.stringify(error));
       }
     }
 
     // PAYMENT
     function bayarPi() {
+      console.log("Klik bayar");
+
       if (!piUser) {
         alert("❌ Login dulu");
         return;
       }
+
+      alert("Memulai pembayaran...");
 
       window.Pi.createPayment(
         {
@@ -69,6 +76,8 @@
         },
         {
           onReadyForServerApproval: function(paymentId) {
+            alert("➡️ Approval dipanggil");
+
             fetch('/api/approve', {
               method: 'POST',
               headers: {'Content-Type': 'application/json'},
@@ -77,6 +86,8 @@
           },
 
           onReadyForServerCompletion: function(paymentId, txid) {
+            alert("✅ Transaksi berhasil");
+
             fetch('/api/complete', {
               method: 'POST',
               headers: {'Content-Type': 'application/json'},
@@ -84,7 +95,7 @@
             });
 
             document.getElementById("status").innerText =
-              "✅ Transaksi berhasil: " + txid;
+              "✅ TX: " + txid;
           },
 
           onCancel: function() {
