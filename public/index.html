@@ -1,9 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>JoyKiss Pistore</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 
 <body style="text-align:center; font-family:Arial; padding:50px;">
@@ -14,95 +18,37 @@
     Login Pi
   </button>
 
-  <br><br>
-
-  <button onclick="bayarPi()" style="padding:15px; font-size:18px;">
-    Bayar dengan Pi
-  </button>
-
-  <!-- Pi SDK -->
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+  <p id="status"></p>
 
   <script>
-    let Pi;
     let piUser = null;
 
-    // 🔥 INIT SAAT HALAMAN DIBUKA
+    // INIT
     window.onload = function () {
-      Pi = window.Pi;
-
-      if (!Pi) {
-        alert("❌ Pi SDK tidak terdeteksi");
+      if (!window.Pi) {
+        document.getElementById("status").innerText = "❌ Buka di Pi Browser";
         return;
       }
 
-      Pi.init({ version: "2.0" });
-      console.log("✅ Pi SDK siap");
+      window.Pi.init({ version: "2.0" });
+      document.getElementById("status").innerText = "✅ Pi SDK siap";
     };
 
-    function loginPi() {
-      alert("Klik login");
-
-      if (!Pi) {
-        alert("❌ SDK belum siap");
-        return;
-      }
-
-      Pi.authenticate(['payments'], function(auth) {
+    // LOGIN
+    async function loginPi() {
+      try {
+        const auth = await window.Pi.authenticate(['username']);
         piUser = auth;
-        alert("✅ Login berhasil");
-      }, function(error) {
-        alert("❌ Login gagal: " + JSON.stringify(error));
-      });
-    }
 
-    function bayarPi() {
-      if (!piUser) {
-        alert("❌ Silakan login dulu");
-        return;
+        document.getElementById("status").innerText =
+          "✅ Login berhasil: " + auth.user.username;
+
+      } catch (error) {
+        document.getElementById("status").innerText =
+          "❌ Login gagal";
       }
-
-      alert("Mulai Payment");
-
-      Pi.createPayment(
-        {
-          amount: 0.01,
-          memo: "JoyKiss Test",
-          metadata: {}
-        },
-        {
-          onReadyForServerApproval: function(paymentId) {
-            alert("➡️ APPROVAL");
-
-            fetch('/api/approve', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ paymentId })
-            });
-          },
-
-          onReadyForServerCompletion: function(paymentId, txid) {
-            alert("✅ TX: " + txid);
-
-            fetch('/api/complete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ paymentId, txid })
-            });
-          },
-
-          onCancel: function() {
-            alert("❌ Dibatalkan");
-          },
-
-          onError: function(error) {
-            alert("❌ Error: " + JSON.stringify(error));
-          }
-        }
-      );
     }
   </script>
 
 </body>
 </html>
-
