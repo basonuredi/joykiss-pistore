@@ -1,8 +1,7 @@
-export default async function handler(req, res) {
-  const { paymentId } = req.body;
+export default function handler(req, res) {
+  if (req.method === 'POST') {
+    return res.status(200).json({ success: true });
+  }
 
-  console.log("APPROVE:", paymentId);
-
-  // Simulasi approve (WAJIB ADA)
-  res.status(200).json({ success: true });
+  res.status(200).send("Approve endpoint hidup");
 }
