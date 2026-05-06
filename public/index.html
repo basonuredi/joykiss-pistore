@@ -1,89 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>JoyKiss Pistore</title>
 
-  <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
 
   <h2>JoyKiss Pistore</h2>
+
+  <button onclick="loginPi()">Login dengan Pi</button>
   <button onclick="payWithPi()">Bayar dengan Pi</button>
 
+  <p id="status"></p>
+
   <script>
-    // 🔥 WAJIB: inisialisasi Pi SDK
     Pi.init({
       version: "2.0",
-      sandbox: true   // ⚠️ true = testnet, false = mainnet
+      sandbox: true
     });
 
-    async function payWithPi() {
+    let currentUser = null;
+
+    // 🔐 LOGIN
+    async function loginPi() {
       try {
-        const payment = Pi.createPayment({
-          amount: 1, // jumlah Pi
-          memo: "Pembelian Produk JoyKiss",
-          metadata: {
-            orderId: "ORDER_" + Date.now()
-          }
-        }, {
+        const scopes = ['username', 'payments'];
 
-          // 1️⃣ saat payment dibuat
-          onReadyForServerApproval: async function(paymentId) {
-            console.log("APPROVAL:", paymentId);
-
-            await fetch('/api/create', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ paymentId })
-            });
-          },
-
-          // 2️⃣ saat siap diselesaikan
-          onReadyForServerCompletion: async function(paymentId, txid) {
-            console.log("COMPLETE:", paymentId, txid);
-
-            const res = await fetch('/api/complete', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                paymentId: paymentId,
-                txid: txid   // 🔴 WAJIB!
-              })
-            });
-
-            const data = await res.json();
-            console.log("COMPLETE RESULT:", data);
-          },
-
-          // 3️⃣ jika sukses
-          onSuccess: function(payment) {
-            alert("Pembayaran berhasil!");
-            console.log(payment);
-          },
-
-          // 4️⃣ jika dibatalkan
-          onCancel: function(payment) {
-            alert("Pembayaran dibatalkan");
-            console.log(payment);
-          },
-
-          // 5️⃣ jika error
-          onError: function(error) {
-            alert("Terjadi error");
-            console.error(error);
-          }
-
+        const auth = await Pi.authenticate(scopes, function(payment) {
+          console.log("Incomplete payment found:", payment);
         });
 
+        currentUser = auth.user;
+        document.getElementById("status").innerText =
+          "Login sukses: " + currentUser.username;
+
+        console.log("User:", currentUser);
+
       } catch (err) {
-        console.error("ERROR PAY:", err);
+        console.error(err);
+        alert("Login gagal");
       }
+    }
+
+    // 💰 BAYAR
+    async function payWithPi() {
+
+      if (!currentUser) {
+        alert("Silakan login dulu!");
+        return;
+      }
+
+      Pi.createPayment({
+        amount: 1,
+        memo: "Pembelian JoyKiss",
+        metadata: { orderId: Date.now() }
+      }, {
+
+        onReadyForServerApproval: async function(paymentId) {
+          await fetch('/api/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId })
+          });
+        },
+
+        onReadyForServerCompletion: async function(paymentId, txid) {
+          await fetch('/api/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId, txid })
+          });
+        },
+
+        onSuccess: function(payment) {
+          alert("Pembayaran sukses!");
+        },
+
+        onCancel: function(payment) {
+          alert("Dibatalkan");
+        },
+
+        onError: function(error) {
+          console.error(error);
+          alert("Error pembayaran");
+        }
+
+      });
     }
   </script>
 
