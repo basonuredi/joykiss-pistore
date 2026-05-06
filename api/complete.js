@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(200).send("Complete endpoint hidup");
   }
 
-  const { paymentId } = req.body;
+  const { paymentId, txid } = req.body; // ✅ TAMBAH txid
 
   try {
     const response = await fetch(
@@ -13,7 +13,8 @@ export default async function handler(req, res) {
         headers: {
           "Authorization": `Key ${process.env.PI_API_KEY}`,
           "Content-Type": "application/json"
-        }
+        },
+        body: JSON.stringify({ txid }) // ✅ WAJIB ADA
       }
     );
 
