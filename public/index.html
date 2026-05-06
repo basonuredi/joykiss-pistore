@@ -13,7 +13,7 @@
   <button onclick="loginPi()">Login dengan Pi</button>
   <button onclick="payWithPi()">Bayar dengan Pi</button>
 
-  <p id="status"></p>
+  <p id="status">Belum login</p>
 
   <script>
     Pi.init({
@@ -23,16 +23,39 @@
 
     let currentUser = null;
 
-    // 🔐 LOGIN
+    // 🔐 LOGIN + AUTO HANDLE PENDING
     async function loginPi() {
       try {
         const scopes = ['username', 'payments'];
 
-        const auth = await Pi.authenticate(scopes, function(payment) {
-          console.log("Incomplete payment found:", payment);
+        const auth = await Pi.authenticate(scopes, async function(payment) {
+          console.log("🔥 Pending ditemukan:", payment);
+
+          if (!payment || !payment.identifier) return;
+
+          try {
+            // 🔴 AUTO COMPLETE
+            const res = await fetch('/api/complete', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                paymentId: payment.identifier,
+                txid: payment.transaction?.txid
+              })
+            });
+
+            const data = await res.json();
+            console.log("✅ Pending diselesaikan:", data);
+
+          } catch (err) {
+            console.error("❌ Gagal auto-complete:", err);
+          }
         });
 
         currentUser = auth.user;
+
         document.getElementById("status").innerText =
           "Login sukses: " + currentUser.username;
 
@@ -55,10 +78,15 @@
       Pi.createPayment({
         amount: 1,
         memo: "Pembelian JoyKiss",
-        metadata: { orderId: Date.now() }
+        metadata: {
+          orderId: "ORDER_" + Date.now()
+        }
       }, {
 
+        // APPROVAL
         onReadyForServerApproval: async function(paymentId) {
+          console.log("APPROVAL:", paymentId);
+
           await fetch('/api/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -66,7 +94,10 @@
           });
         },
 
+        // COMPLETE
         onReadyForServerCompletion: async function(paymentId, txid) {
+          console.log("COMPLETE:", paymentId, txid);
+
           await fetch('/api/complete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -74,14 +105,18 @@
           });
         },
 
+        // SUCCESS
         onSuccess: function(payment) {
           alert("Pembayaran sukses!");
+          console.log(payment);
         },
 
+        // CANCEL
         onCancel: function(payment) {
           alert("Dibatalkan");
         },
 
+        // ERROR
         onError: function(error) {
           console.error(error);
           alert("Error pembayaran");
