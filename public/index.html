@@ -1,112 +1,89 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>JoyKiss Pistore</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
+<body>
 
-<body style="text-align:center; font-family:Arial; padding:50px;">
-
-  <h1>JoyKiss Pistore</h1>
-
-  <button onclick="loginPi()" style="padding:15px; font-size:18px;">
-    Login Pi
-  </button>
-
-  <br><br>
-
-  <button onclick="bayarPi()" style="padding:15px; font-size:18px;">
-    Bayar dengan Pi
-  </button>
-
-  <p id="status"></p>
+  <h2>JoyKiss Pistore</h2>
+  <button onclick="payWithPi()">Bayar dengan Pi</button>
 
   <script>
-    let piUser = null;
+    // 🔥 WAJIB: inisialisasi Pi SDK
+    Pi.init({
+      version: "2.0",
+      sandbox: true   // ⚠️ true = testnet, false = mainnet
+    });
 
-    // INIT
-    window.onload = function () {
-      if (!window.Pi) {
-        document.getElementById("status").innerText = "❌ Buka di Pi Browser";
-        return;
-      }
-
-      window.Pi.init({ version: "2.0", Sandbox: true });
-      document.getElementById("status").innerText = "✅ Pi SDK siap";
-    };
-
-    // LOGIN (pakai payments)
-    async function loginPi() {
+    async function payWithPi() {
       try {
-        alert("Mulai login...");
+        const payment = Pi.createPayment({
+          amount: 1, // jumlah Pi
+          memo: "Pembelian Produk JoyKiss",
+          metadata: {
+            orderId: "ORDER_" + Date.now()
+          }
+        }, {
 
-        const auth = await window.Pi.authenticate(['username', 'payments']);
-        piUser = auth;
+          // 1️⃣ saat payment dibuat
+          onReadyForServerApproval: async function(paymentId) {
+            console.log("APPROVAL:", paymentId);
 
-        document.getElementById("status").innerText =
-          "✅ Login: " + auth.user.username;
-
-        alert("Login sukses");
-
-      } catch (error) {
-        alert("❌ Login gagal: " + JSON.stringify(error));
-      }
-    }
-
-    // PAYMENT
-    function bayarPi() {
-      console.log("Klik bayar");
-
-      if (!piUser) {
-        alert("❌ Login dulu");
-        return;
-      }
-
-      alert("Memulai pembayaran...");
-
-      window.Pi.createPayment(
-        {
-          amount: 0.01,
-          memo: "Test JoyKiss",
-          metadata: { productId: "test001" }
-        },
-        {
-          onReadyForServerApproval: function(paymentId) {
-            alert("➡️ Approval dipanggil");
-
-            fetch('/api/approve', {
+            await fetch('/api/create', {
               method: 'POST',
-              headers: {'Content-Type': 'application/json'},
+              headers: {
+                'Content-Type': 'application/json'
+              },
               body: JSON.stringify({ paymentId })
             });
           },
 
-          onReadyForServerCompletion: function(paymentId, txid) {
-            alert("✅ Transaksi berhasil");
+          // 2️⃣ saat siap diselesaikan
+          onReadyForServerCompletion: async function(paymentId, txid) {
+            console.log("COMPLETE:", paymentId, txid);
 
-            fetch('/api/complete', {
+            const res = await fetch('/api/complete', {
               method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({ paymentId, txid })
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                paymentId: paymentId,
+                txid: txid   // 🔴 WAJIB!
+              })
             });
 
-            document.getElementById("status").innerText =
-              "✅ TX: " + txid;
+            const data = await res.json();
+            console.log("COMPLETE RESULT:", data);
           },
 
-          onCancel: function() {
-            alert("❌ Transaksi dibatalkan");
+          // 3️⃣ jika sukses
+          onSuccess: function(payment) {
+            alert("Pembayaran berhasil!");
+            console.log(payment);
           },
 
+          // 4️⃣ jika dibatalkan
+          onCancel: function(payment) {
+            alert("Pembayaran dibatalkan");
+            console.log(payment);
+          },
+
+          // 5️⃣ jika error
           onError: function(error) {
-            alert("❌ Error: " + JSON.stringify(error));
+            alert("Terjadi error");
+            console.error(error);
           }
-        }
-      );
+
+        });
+
+      } catch (err) {
+        console.error("ERROR PAY:", err);
+      }
     }
   </script>
 
