@@ -4,7 +4,7 @@ const products = [
   {
     name: "Tomat",
     price: 3,
-    image: "/images/tomat merah.jpg"
+    image: "/images/tomat-merah.jpg"
   },
   {
     name: "Madu Hutan",
@@ -14,7 +14,7 @@ const products = [
   {
     name: "Ikan Segar",
     price: 4,
-    image: "/images/ikan nila hitam.jpg"
+    image: "/images/ikan-nila-hitam.jpg"
   }
 ];
 
