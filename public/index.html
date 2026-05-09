@@ -11,11 +11,18 @@
   <h2>JoyKiss Pistore</h2>
 
   <button onclick="loginPi()">Login dengan Pi</button>
-  <button onclick="payWithPi()">Bayar dengan Pi</button>
 
   <p id="status">Belum login</p>
 
+  <button id="loginBtn">
+    Login with Pi
+  </button>
+
+  <div id="app"></div>
+
+  <script type="module" src="/src/app.js"></script>
   <script>
+    
     Pi.init({
       version: "2.0",
       sandbox: true
