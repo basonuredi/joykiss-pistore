@@ -1,125 +1,23 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>JoyKiss Pistore</title>
+<html lang="en">
 
-  <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>JoyKiss Pistore</title>
 </head>
+
 <body>
 
-  <h2>JoyKiss Pistore</h2>
-<button id="loginBtn">
+  <button id="loginBtn">
     Login with Pi
   </button>
 
   <div id="products"></div>
 
   <script type="module" src="/src/app.js"></script>
-    
-    Pi.init({
-      version: "2.0",
-      sandbox: true
-    });
-
-    let currentUser = null;
-
-    // 🔐 LOGIN
-    async function loginPi() {
-      try {
-        const scopes = ['username', 'payments'];
-
-        const auth = await Pi.authenticate(scopes, async function(payment) {
-          console.log("🔥 Pending ditemukan:", payment);
-
-          if (!payment || !payment.identifier) return;
-
-          // AUTO COMPLETE kalau ada pending
-          await fetch('/api/complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              paymentId: payment.identifier,
-              txid: payment.transaction?.txid
-            })
-          });
-        });
-
-        currentUser = auth.user;
-
-        document.getElementById("status").innerText =
-          "Login sukses: " + currentUser.username;
-
-      } catch (err) {
-        console.error(err);
-        alert("Login gagal");
-      }
-    }
-
-    // 💰 BAYAR DENGAN PI
-    async function payWithPi() {
-
-      if (!currentUser) {
-        alert("Silakan login dulu!");
-        return;
-      }
-
-      Pi.createPayment({
-        amount: 1,
-        memo: "Pembelian JoyKiss",
-        metadata: {
-          orderId: "ORDER_" + Date.now()
-        }
-      }, {
-
-        // ✅ APPROVE KE SERVER
-        onReadyForServerApproval: async function(paymentId) {
-          console.log("APPROVE:", paymentId);
-
-          const res = await fetch('/api/approve', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId })
-          });
-
-          const data = await res.json();
-          console.log("Approve result:", data);
-        },
-
-        // ✅ COMPLETE KE SERVER
-        onReadyForServerCompletion: async function(paymentId, txid) {
-          console.log("COMPLETE:", paymentId, txid);
-
-          const res = await fetch('/api/complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentId, txid })
-          });
-
-          const data = await res.json();
-          console.log("Complete result:", data);
-        },
-
-        // ✅ SUKSES
-        onSuccess: function(payment) {
-          alert("✅ Pembayaran sukses!");
-          console.log(payment);
-        },
-
-        // ❌ BATAL
-        onCancel: function(payment) {
-          alert("❌ Pembayaran dibatalkan");
-        },
-
-        // ❌ ERROR
-        onError: function(error) {
-          console.error(error);
-          alert("⚠️ Terjadi error pembayaran");
-        }
-
-      });
-    }
-  </script>
 
 </body>
+
 </html>
