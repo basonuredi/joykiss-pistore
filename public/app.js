@@ -141,3 +141,30 @@ document.querySelectorAll(".buy-btn")
   };
 
 });
+let currentUser = null;
+
+document.getElementById("loginBtn")
+.onclick = async () => {
+
+  try {
+
+    const scopes = ['username', 'payments'];
+
+    const auth = await Pi.authenticate(scopes);
+
+    currentUser = auth.user;
+
+    document.getElementById("status")
+    .innerText =
+      "Login sukses: " +
+      currentUser.username;
+
+  } catch(err){
+
+    console.error(err);
+
+    alert("Login gagal");
+
+  }
+
+};
