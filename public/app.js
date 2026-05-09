@@ -1,4 +1,7 @@
-
+Pi.init({
+  version: "2.0",
+  sandbox: true
+});
 const products = [
   {
     name: "Madu Hutan",
