@@ -13,7 +13,7 @@ const products = [
   {
     name: "Ikan Nila",
     price: 4,
-    image: "/images/ikan-mila-hitam.jpg"
+    image: "/images/ikan-nila-hitam.jpg"
   }
 ];
 
