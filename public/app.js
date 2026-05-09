@@ -8,12 +8,12 @@ const products = [
   {
     name: "Tomat Segar",
     price: 3,
-    image: "/images/tomat.jpg"
+    image: "/images/tomat-merah.jpg"
   },
   {
     name: "Ikan Nila",
     price: 4,
-    image: "/images/ikan.jpg"
+    image: "/images/ikan-mila-hitam.jpg"
   }
 ];
 
