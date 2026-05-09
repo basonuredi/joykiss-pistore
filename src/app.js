@@ -28,6 +28,10 @@ const productHTML = products.map(product => `
 `).join("");
 
 app.innerHTML = `
+  <h1 style="text-align:center;color:#6b21a8;">
+    JoyKiss Pistore
+  </h1>
+
   <div class="products-grid">
     ${productHTML}
   </div>
@@ -39,6 +43,7 @@ style.innerHTML = `
 body {
   font-family: Arial;
   padding: 20px;
+  background:#f5f5f5;
 }
 
 .products-grid {
@@ -58,6 +63,21 @@ body {
   width:100%;
   height:180px;
   object-fit:cover;
+  border-radius:10px;
+}
+
+.price {
+  color:#6b21a8;
+  font-weight:bold;
+}
+
+.buy-btn {
+  background:#6b21a8;
+  color:white;
+  border:none;
+  padding:10px;
+  width:100%;
+  border-radius:10px;
 }
 `;
 
