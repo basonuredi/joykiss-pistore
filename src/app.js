@@ -24,7 +24,7 @@ document.getElementById("loginBtn").addEventListener("click", () => {
   });
 });
 
-const app = document.getElementById("app");
+const app = document.getElementById("products");
 
 const productHTML = products.map(product => `
   <div class="card">
