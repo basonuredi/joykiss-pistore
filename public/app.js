@@ -37,3 +37,6 @@ app.innerHTML = `
 
   </div>
 `;
+document.querySelector("button").onclick = () => {
+  alert("Tombol berhasil!");
+};
