@@ -2,9 +2,9 @@ import { loginWithPi } from "./pi-sdk.js";
 
 const products = [
   {
-    name: "Kopi Robusta",
+    name: "Tomat",
     price: 3,
-    image: "/images/kopi.jpg"
+    image: "/images/tomat merah.jpg"
   },
   {
     name: "Madu Hutan",
@@ -14,7 +14,7 @@ const products = [
   {
     name: "Ikan Segar",
     price: 4,
-    image: "/images/ikan.jpg"
+    image: "/images/ikan nila hitam.jpg"
   }
 ];
 
