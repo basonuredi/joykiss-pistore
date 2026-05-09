@@ -40,12 +40,20 @@ const productHTML = products.map(product => `
   </div>
 `).join("");
 
-app.innerHTML += `
+
+app.innerHTML = `
+  <h1 style="text-align:center;color:#6b21a8;">
+    JoyKiss Pistore
+  </h1>
+
+  <p style="text-align:center;">
+    Marketplace Petani Digital Berbasis Pi
+  </p>
+
   <div class="products-grid">
     ${productHTML}
   </div>
 `;
-
 const style = document.createElement("style");
 
 style.innerHTML = `
