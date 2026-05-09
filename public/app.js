@@ -32,7 +32,7 @@ app.innerHTML = `
       background:purple;
       color:white;
     ">
-      Buy with Pi
+      Tes Button
     </button>
 
   </div>
